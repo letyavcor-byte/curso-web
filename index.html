@@ -3449,6 +3449,1158 @@ document.querySelector("footer").textContent =
   "Curso recurrente IVA-A-01 · Desarrollo didáctico basado en las " +
   "presentaciones M00–M05. Los diagramas son explicativos y no " +
   "sustituyen formatos oficiales ni procedimientos aprobados.";
+  /* CONEXIÓN DEL CURSO CON EL REGISTRO PRIVADO */
+
+const SERVICIO_CURSO =
+  "https://script.google.com/macros/s/AKfycbwDa8jOoD6pow2tR9UjSfvFhHp8BHgYtfbJMqez7ktwXbfRh9K_KT7pcdVi48vP_f9ZHQ/exec";
+
+const VERSION_CURSO = "IVA-A-01-v1";
+
+const CLAVE_SESION_CURSO =
+  "iva-a-01-sesion-v1";
+
+let usuarioCurso = null;
+let estadoGuardadoCurso = null;
+let moduloVisibleCurso = 0;
+let envioEnProcesoCurso = false;
+let sincronizandoCurso = false;
+
+
+/* ESTILOS DEL ACCESO Y LOS RESULTADOS */
+
+const estilosAccesoCurso =
+  document.createElement("style");
+
+estilosAccesoCurso.textContent = `
+  .acceso-campo {
+    display: block;
+    width: 100%;
+    max-width: 520px;
+    padding: 12px;
+    margin: 8px 0 16px;
+    border: 1px solid #b9cbd9;
+    border-radius: 8px;
+    font: inherit;
+  }
+
+  .mensaje-servidor {
+    padding: 15px;
+    background: #eaf5f6;
+    border-left: 4px solid #087f8c;
+    border-radius: 8px;
+    margin: 18px 0;
+    overflow-wrap: anywhere;
+  }
+
+  .entrega-confirmada {
+    padding: 18px;
+    margin: 20px 0;
+    background: #e5f5ed;
+    border-left: 5px solid #238052;
+    border-radius: 10px;
+  }
+
+  .aviso-entrega {
+    padding: 16px;
+    background: #fff7dc;
+    border-radius: 9px;
+    margin: 18px 0;
+  }
+`;
+
+document.head.appendChild(
+  estilosAccesoCurso
+);
+
+
+/* PANEL DE ACCESO */
+
+const panelAccesoCurso =
+  document.createElement("section");
+
+panelAccesoCurso.className = "panel";
+panelAccesoCurso.id = "panelAccesoCurso";
+
+panelAccesoCurso.innerHTML = `
+  <h2>Acceso a las actividades</h2>
+
+  <p>
+    Puedes leer el contenido sin iniciar sesión.
+    Para entregar actividades, verifica tu correo autorizado.
+  </p>
+
+  <div id="formulariosAccesoCurso">
+
+    <form id="solicitarAccesoCurso">
+      <label for="correoAccesoCurso">
+        Correo autorizado
+      </label>
+
+      <input
+        class="acceso-campo"
+        id="correoAccesoCurso"
+        type="email"
+        autocomplete="email"
+        maxlength="254"
+        required
+      >
+
+      <button
+        type="submit"
+        id="botonSolicitarCodigoCurso"
+      >
+        Enviar código a mi correo
+      </button>
+    </form>
+
+    <form
+      id="verificarAccesoCurso"
+      hidden
+    >
+      <p>
+        Revisa tu correo y copia el código.
+        Utiliza únicamente el código más reciente.
+      </p>
+
+      <label for="codigoAccesoCurso">
+        Código de acceso
+      </label>
+
+      <input
+        class="acceso-campo"
+        id="codigoAccesoCurso"
+        type="text"
+        autocomplete="one-time-code"
+        maxlength="30"
+        required
+      >
+
+      <button
+        type="submit"
+        id="botonVerificarCodigoCurso"
+      >
+        Verificar e ingresar
+      </button>
+    </form>
+
+  </div>
+
+  <div id="sesionActivaCurso" hidden>
+    <p id="identidadCurso"></p>
+
+    <div class="acciones">
+      <button
+        type="button"
+        id="actualizarEntregasCurso"
+      >
+        Actualizar mis entregas
+      </button>
+
+      <button
+        type="button"
+        id="cerrarSesionCurso"
+      >
+        Cerrar sesión
+      </button>
+    </div>
+  </div>
+
+  <p
+    id="mensajeAccesoCurso"
+    role="status"
+  ></p>
+`;
+
+document.querySelector("main").prepend(
+  panelAccesoCurso
+);
+
+
+/* MENSAJES Y SESIÓN */
+
+function mensajeAccesoCurso(texto) {
+  document.getElementById(
+    "mensajeAccesoCurso"
+  ).textContent = texto;
+}
+
+function guardarSesionCurso() {
+  try {
+    if (usuarioCurso) {
+      sessionStorage.setItem(
+        CLAVE_SESION_CURSO,
+        JSON.stringify(usuarioCurso)
+      );
+    } else {
+      sessionStorage.removeItem(
+        CLAVE_SESION_CURSO
+      );
+    }
+  } catch (error) {
+    /*
+     * Si no hay almacenamiento disponible,
+     * habrá que verificar de nuevo al recargar.
+     */
+  }
+}
+
+function recuperarSesionCurso() {
+  try {
+    const texto = sessionStorage.getItem(
+      CLAVE_SESION_CURSO
+    );
+
+    if (!texto) {
+      return null;
+    }
+
+    const datos = JSON.parse(texto);
+
+    if (
+      typeof datos.correo === "string" &&
+      typeof datos.sesion === "string" &&
+      datos.sesion.length >= 30
+    ) {
+      return {
+        correo: datos.correo,
+        nombre: String(datos.nombre || ""),
+        sesion: datos.sesion
+      };
+    }
+
+  } catch (error) {
+    return null;
+  }
+
+  return null;
+}
+
+function datosSesionCurso() {
+  if (!usuarioCurso) {
+    throw new Error(
+      "Verifica tu correo antes de continuar."
+    );
+  }
+
+  return {
+    correo: usuarioCurso.correo,
+    sesion: usuarioCurso.sesion
+  };
+}
+
+
+/* COMUNICACIÓN CON APPS SCRIPT */
+
+function origenRespuestaValidoCurso(origen) {
+  try {
+    const url = new URL(origen);
+
+    if (url.protocol !== "https:") {
+      return false;
+    }
+
+    return (
+      url.hostname === "script.google.com" ||
+      url.hostname === "script.googleusercontent.com" ||
+      url.hostname.endsWith(
+        "-script.googleusercontent.com"
+      )
+    );
+
+  } catch (error) {
+    return false;
+  }
+}
+
+function llamarServicioCurso(
+  accion,
+  datos = {}
+) {
+  return new Promise((resolver, rechazar) => {
+    const id =
+      "iva_" +
+      Date.now() +
+      "_" +
+      (
+        window.crypto &&
+        typeof window.crypto.randomUUID === "function"
+          ? window.crypto.randomUUID()
+          : Math.random().toString(36).slice(2)
+      );
+
+    const marco =
+      document.createElement("iframe");
+
+    marco.name = id;
+    marco.hidden = true;
+    marco.title =
+      "Comunicación con el registro del curso";
+
+    const formulario =
+      document.createElement("form");
+
+    formulario.method = "POST";
+    formulario.action = SERVICIO_CURSO;
+    formulario.target = id;
+    formulario.hidden = true;
+
+    const campo =
+      document.createElement("input");
+
+    campo.type = "hidden";
+    campo.name = "solicitud";
+
+    campo.value = JSON.stringify({
+      ...datos,
+      id: id,
+      accion: accion
+    });
+
+    formulario.appendChild(campo);
+
+    let terminado = false;
+    let temporizador;
+
+    function limpiar() {
+      window.removeEventListener(
+        "message",
+        recibirRespuesta
+      );
+
+      clearTimeout(temporizador);
+
+      formulario.remove();
+      marco.remove();
+    }
+
+    function recibirRespuesta(evento) {
+      if (
+        terminado ||
+        !origenRespuestaValidoCurso(
+          evento.origin
+        )
+      ) {
+        return;
+      }
+
+      const respuesta = evento.data;
+
+      if (
+        !respuesta ||
+        typeof respuesta !== "object" ||
+        respuesta.tipo !== "IVA_A_EVALUACION" ||
+        respuesta.id !== id
+      ) {
+        return;
+      }
+
+      terminado = true;
+      limpiar();
+
+      if (respuesta.ok) {
+        resolver(respuesta.datos);
+      } else {
+        rechazar(
+          new Error(
+            respuesta.error ||
+            "No se pudo completar la solicitud."
+          )
+        );
+      }
+    }
+
+    window.addEventListener(
+      "message",
+      recibirRespuesta
+    );
+
+    temporizador = setTimeout(() => {
+      if (terminado) {
+        return;
+      }
+
+      terminado = true;
+      limpiar();
+
+      rechazar(
+        new Error(
+          "No llegó la confirmación del servicio. " +
+          "Si estabas entregando una actividad, " +
+          "pulsa Actualizar mis entregas antes de intentar de nuevo."
+        )
+      );
+
+    }, 65000);
+
+    document.body.append(
+      marco,
+      formulario
+    );
+
+    formulario.submit();
+  });
+}
+
+
+/* VISUALIZACIÓN DE SESIÓN Y AVANCE */
+
+function pintarSesionCurso() {
+  const activa = Boolean(usuarioCurso);
+
+  document.getElementById(
+    "formulariosAccesoCurso"
+  ).hidden = activa;
+
+  document.getElementById(
+    "sesionActivaCurso"
+  ).hidden = !activa;
+
+  document.getElementById(
+    "actualizarEntregasCurso"
+  ).disabled =
+    sincronizandoCurso ||
+    envioEnProcesoCurso;
+
+  document.getElementById(
+    "cerrarSesionCurso"
+  ).disabled = envioEnProcesoCurso;
+
+  document.getElementById(
+    "identidadCurso"
+  ).textContent = activa
+    ? "Sesión de " +
+      usuarioCurso.nombre +
+      " · " +
+      usuarioCurso.correo
+    : "";
+}
+
+function entregaModuloCurso(indice) {
+  if (
+    !estadoGuardadoCurso ||
+    !Array.isArray(
+      estadoGuardadoCurso.entregas
+    )
+  ) {
+    return null;
+  }
+
+  return estadoGuardadoCurso.entregas.find(
+    entrega =>
+      entrega.modulo ===
+      modulos[indice].codigo
+  ) || null;
+}
+
+function actualizarProgresoServidorCurso() {
+  const entregadas = estadoGuardadoCurso
+    ? estadoGuardadoCurso.entregas.length
+    : 0;
+
+  document.getElementById(
+    "actividades"
+  ).textContent =
+    "Actividades registradas: " +
+    entregadas +
+    " de 5";
+
+  document.getElementById(
+    "barraActividades"
+  ).value = entregadas;
+
+  const leidas =
+    lecturas.filter(Boolean).length;
+
+  document.getElementById(
+    "lectura"
+  ).textContent =
+    "Lecturas marcadas: " +
+    leidas +
+    " de 6";
+
+  document.getElementById(
+    "barraLectura"
+  ).value = leidas;
+}
+
+
+/* SUSTITUYE LA ACTUALIZACIÓN LOCAL */
+
+actualizar = function() {
+  actualizarProgresoServidorCurso();
+};
+
+
+/* CONECTA LAS ACTIVIDADES CON EL SERVIDOR */
+
+const mostrarContenidoAntesDelRegistroCurso =
+  mostrar;
+
+mostrar = function(indice) {
+  moduloVisibleCurso = indice;
+
+  /*
+   * Evita recuperar calificaciones locales
+   * de la versión anterior de práctica.
+   */
+  resultados.fill(null);
+
+  mostrarContenidoAntesDelRegistroCurso(
+    indice
+  );
+
+  actualizarProgresoServidorCurso();
+
+  if (indice === 0) {
+    return;
+  }
+
+  const formularioAnterior =
+    document.getElementById("actividad");
+
+  if (!formularioAnterior) {
+    return;
+  }
+
+  /*
+   * Clonar elimina los controladores anteriores
+   * que calificaban en el navegador.
+   */
+  const formulario =
+    formularioAnterior.cloneNode(true);
+
+  formularioAnterior.replaceWith(
+    formulario
+  );
+
+  formulario
+    .querySelector("#repetir")
+    ?.remove();
+
+  formulario
+    .querySelectorAll(".feedback")
+    .forEach(elemento => {
+      elemento.hidden = true;
+      elemento.textContent = "";
+    });
+
+  const aviso =
+    document.createElement("div");
+
+  aviso.className = "aviso-entrega";
+
+  aviso.textContent =
+    "Una sola entrega definitiva por módulo. " +
+    "Puedes cambiar tus respuestas antes de entregar. " +
+    "Después se conservará la primera entrega aceptada por el servicio.";
+
+  formulario.before(aviso);
+
+  const boton = formulario.querySelector(
+    "#entregar"
+  );
+
+  const entrega =
+    entregaModuloCurso(indice);
+
+  if (entrega) {
+    formulario
+      .querySelectorAll(
+        'input[type="radio"]'
+      )
+      .forEach(campo => {
+        campo.checked = false;
+        campo.disabled = true;
+      });
+
+    entrega.respuestas.forEach(
+      (respuesta, numero) => {
+        const campo = formulario.querySelector(
+          '[name="q' +
+          numero +
+          '"][value="' +
+          respuesta +
+          '"]'
+        );
+
+        if (campo) {
+          campo.checked = true;
+        }
+      }
+    );
+
+    boton.disabled = true;
+    boton.textContent =
+      "Actividad ya entregada";
+
+    const nota =
+      document.getElementById("nota");
+
+    nota.className = "entrega-confirmada";
+
+    nota.textContent =
+      "Entrega guardada. Resultado: " +
+      entrega.aciertos +
+      " de " +
+      entrega.total +
+      " respuestas correctas. Calificación: " +
+      entrega.calificacion +
+      "/100. No se permite otra entrega.";
+
+    return;
+  }
+
+  const bloqueada =
+    !usuarioCurso ||
+    !estadoGuardadoCurso ||
+    envioEnProcesoCurso ||
+    sincronizandoCurso;
+
+  formulario
+    .querySelectorAll(
+      'input[type="radio"]'
+    )
+    .forEach(campo => {
+      campo.checked = false;
+      campo.disabled = bloqueada;
+    });
+
+  boton.disabled = bloqueada;
+
+  boton.textContent = !usuarioCurso
+    ? "Verifica tu correo para entregar"
+    : bloqueada
+      ? "Espera a que termine la comprobación"
+      : "Entregar definitivamente";
+
+  formulario.addEventListener(
+    "submit",
+    async evento => {
+      evento.preventDefault();
+
+      if (
+        !usuarioCurso ||
+        !estadoGuardadoCurso ||
+        envioEnProcesoCurso ||
+        sincronizandoCurso
+      ) {
+        return;
+      }
+
+      const datos =
+        new FormData(formulario);
+
+      const faltantes =
+        modulos[indice].preguntas
+          .map(
+            (pregunta, numero) =>
+              numero
+          )
+          .filter(
+            numero =>
+              !datos.has("q" + numero)
+          );
+
+      const error =
+        formulario.querySelector(
+          "#error"
+        );
+
+      if (faltantes.length) {
+        error.textContent =
+          "Faltan las preguntas: " +
+          faltantes
+            .map(
+              numero => numero + 1
+            )
+            .join(", ") +
+          ".";
+
+        formulario.querySelector(
+          '[name="q' +
+          faltantes[0] +
+          '"]'
+        ).focus();
+
+        return;
+      }
+
+      const confirmar = window.confirm(
+        "Vas a entregar " +
+        modulos[indice].codigo +
+        ". No podrás modificar ni repetir esta actividad. " +
+        "¿Confirmas la entrega?"
+      );
+
+      if (!confirmar) {
+        return;
+      }
+
+      const respuestas =
+        modulos[indice].preguntas.map(
+          (pregunta, numero) =>
+            Number(
+              datos.get("q" + numero)
+            )
+        );
+
+      envioEnProcesoCurso = true;
+
+      boton.disabled = true;
+      boton.textContent =
+        "Guardando entrega...";
+
+      error.textContent = "";
+
+      formulario
+        .querySelectorAll(
+          'input[type="radio"]'
+        )
+        .forEach(campo => {
+          campo.disabled = true;
+        });
+
+      pintarSesionCurso();
+
+      try {
+        estadoGuardadoCurso =
+          await llamarServicioCurso(
+            "entregar",
+            {
+              ...datosSesionCurso(),
+              version: VERSION_CURSO,
+              modulo:
+                modulos[indice].codigo,
+              respuestas: respuestas
+            }
+          );
+
+        envioEnProcesoCurso = false;
+
+        pintarSesionCurso();
+        actualizarProgresoServidorCurso();
+
+        mostrar(
+          moduloVisibleCurso
+        );
+
+        mensajeAccesoCurso(
+          "La entrega fue confirmada por el servicio."
+        );
+
+        pintarResultadoFinalCurso();
+
+      } catch (fallo) {
+        envioEnProcesoCurso = false;
+
+        /*
+         * Si no llegó confirmación, no suponemos
+         * que la entrega dejó de guardarse.
+         */
+        estadoGuardadoCurso = null;
+
+        pintarSesionCurso();
+
+        mostrar(
+          moduloVisibleCurso
+        );
+
+        mensajeAccesoCurso(
+          fallo.message +
+          " Consulta Actualizar mis entregas para comprobar el registro."
+        );
+      }
+    }
+  );
+};
+
+
+/* SOLICITUD DE CÓDIGO POR CORREO */
+
+document.getElementById(
+  "solicitarAccesoCurso"
+).addEventListener(
+  "submit",
+  async evento => {
+    evento.preventDefault();
+
+    const boton =
+      document.getElementById(
+        "botonSolicitarCodigoCurso"
+      );
+
+    const correo =
+      document.getElementById(
+        "correoAccesoCurso"
+      ).value
+        .trim()
+        .toLowerCase();
+
+    boton.disabled = true;
+
+    mensajeAccesoCurso(
+      "Solicitando código. Espera un momento..."
+    );
+
+    try {
+      const respuesta =
+        await llamarServicioCurso(
+          "solicitarCodigo",
+          {
+            correo: correo
+          }
+        );
+
+      document.getElementById(
+        "verificarAccesoCurso"
+      ).hidden = false;
+
+      mensajeAccesoCurso(
+        respuesta.mensaje +
+        " Puede tardar en llegar. " +
+        "Revisa también spam. " +
+        "No solicites varios códigos seguidos."
+      );
+
+    } catch (error) {
+      mensajeAccesoCurso(
+        error.message
+      );
+
+    } finally {
+      boton.disabled = false;
+    }
+  }
+);
+
+
+/* VERIFICACIÓN DEL CÓDIGO */
+
+document.getElementById(
+  "verificarAccesoCurso"
+).addEventListener(
+  "submit",
+  async evento => {
+    evento.preventDefault();
+
+    const boton =
+      document.getElementById(
+        "botonVerificarCodigoCurso"
+      );
+
+    boton.disabled = true;
+
+    mensajeAccesoCurso(
+      "Verificando acceso..."
+    );
+
+    try {
+      const respuesta =
+        await llamarServicioCurso(
+          "verificarCodigo",
+          {
+            correo:
+              document.getElementById(
+                "correoAccesoCurso"
+              ).value
+                .trim()
+                .toLowerCase(),
+
+            codigo:
+              document.getElementById(
+                "codigoAccesoCurso"
+              ).value.trim()
+          }
+        );
+
+      usuarioCurso = {
+        correo: respuesta.correo,
+        nombre: respuesta.nombre,
+        sesion: respuesta.sesion
+      };
+
+      estadoGuardadoCurso =
+        respuesta.estado;
+
+      guardarSesionCurso();
+      pintarSesionCurso();
+
+      mostrar(
+        moduloVisibleCurso
+      );
+
+      pintarResultadoFinalCurso();
+
+      document.getElementById(
+        "codigoAccesoCurso"
+      ).value = "";
+
+      mensajeAccesoCurso(
+        "Correo verificado. Tus entregas anteriores se recuperaron."
+      );
+
+    } catch (error) {
+      mensajeAccesoCurso(
+        error.message
+      );
+
+    } finally {
+      boton.disabled = false;
+    }
+  }
+);
+
+
+/* RECUPERACIÓN DE ENTREGAS GUARDADAS */
+
+async function sincronizarEntregasCurso() {
+  if (
+    !usuarioCurso ||
+    sincronizandoCurso ||
+    envioEnProcesoCurso
+  ) {
+    return;
+  }
+
+  sincronizandoCurso = true;
+
+  pintarSesionCurso();
+
+  mostrar(
+    moduloVisibleCurso
+  );
+
+  mensajeAccesoCurso(
+    "Consultando entregas guardadas..."
+  );
+
+  try {
+    estadoGuardadoCurso =
+      await llamarServicioCurso(
+        "consultar",
+        datosSesionCurso()
+      );
+
+    mensajeAccesoCurso(
+      "Entregas actualizadas desde el registro privado."
+    );
+
+    pintarResultadoFinalCurso();
+
+  } catch (error) {
+    estadoGuardadoCurso = null;
+
+    mensajeAccesoCurso(
+      error.message +
+      " Si la sesión venció, ciérrala y solicita un nuevo código."
+    );
+
+  } finally {
+    sincronizandoCurso = false;
+
+    pintarSesionCurso();
+
+    mostrar(
+      moduloVisibleCurso
+    );
+  }
+}
+
+document.getElementById(
+  "actualizarEntregasCurso"
+).addEventListener(
+  "click",
+  sincronizarEntregasCurso
+);
+
+
+/* CIERRE DE SESIÓN EN ESTE NAVEGADOR */
+
+document.getElementById(
+  "cerrarSesionCurso"
+).addEventListener(
+  "click",
+  () => {
+    if (envioEnProcesoCurso) {
+      return;
+    }
+
+    usuarioCurso = null;
+    estadoGuardadoCurso = null;
+
+    guardarSesionCurso();
+    pintarSesionCurso();
+
+    mostrar(
+      moduloVisibleCurso
+    );
+
+    document.getElementById(
+      "verificarAccesoCurso"
+    ).hidden = true;
+
+    document.getElementById(
+      "codigoAccesoCurso"
+    ).value = "";
+
+    document.getElementById(
+      "resultado"
+    ).textContent = "";
+
+    mensajeAccesoCurso(
+      "Sesión cerrada en este navegador. Las entregas guardadas no se borraron."
+    );
+  }
+);
+
+
+/* RESULTADOS PROCEDENTES DEL SERVIDOR */
+
+function pintarResultadoFinalCurso() {
+  const salida =
+    document.getElementById(
+      "resultado"
+    );
+
+  salida.replaceChildren();
+
+  if (!usuarioCurso) {
+    salida.textContent =
+      "Verifica tu correo para consultar tu resultado.";
+
+    return;
+  }
+
+  if (!estadoGuardadoCurso) {
+    salida.textContent =
+      "Actualiza tus entregas para consultar el resultado.";
+
+    return;
+  }
+
+  const lista =
+    document.createElement("ul");
+
+  estadoGuardadoCurso.entregas.forEach(
+    entrega => {
+      const elemento =
+        document.createElement("li");
+
+      elemento.textContent =
+        entrega.modulo +
+        ": " +
+        entrega.aciertos +
+        " de " +
+        entrega.total +
+        " — " +
+        entrega.calificacion +
+        "/100.";
+
+      lista.appendChild(
+        elemento
+      );
+    }
+  );
+
+  salida.appendChild(
+    lista
+  );
+
+  const resumen =
+    document.createElement("p");
+
+  if (estadoGuardadoCurso.final) {
+    resumen.textContent =
+      "Calificación final guardada: " +
+      estadoGuardadoCurso.final.calificacion +
+      "/100. Estado del correo: " +
+      estadoGuardadoCurso.final.estadoCorreo +
+      ".";
+  } else {
+    resumen.textContent =
+      "Actividades registradas: " +
+      estadoGuardadoCurso.entregas.length +
+      " de 5. La calificación final se genera al entregar las cinco.";
+  }
+
+  salida.appendChild(
+    resumen
+  );
+}
+
+
+/* SUSTITUYE EL BOTÓN ANTERIOR DE RESULTADOS */
+
+const botonResultadoAnterior =
+  document.getElementById(
+    "resultadoBoton"
+  );
+
+const botonResultadoServidor =
+  botonResultadoAnterior.cloneNode(
+    true
+  );
+
+botonResultadoAnterior.replaceWith(
+  botonResultadoServidor
+);
+
+botonResultadoServidor.addEventListener(
+  "click",
+  async () => {
+    if (usuarioCurso) {
+      await sincronizarEntregasCurso();
+    }
+
+    pintarResultadoFinalCurso();
+  }
+);
+
+
+/* ACTUALIZACIÓN DE LOS AVISOS */
+
+const parrafoProgreso =
+  document.querySelector(
+    ".progreso .estado"
+  );
+
+if (parrafoProgreso) {
+  parrafoProgreso.textContent =
+    "Las lecturas marcadas se conservan durante esta sesión. " +
+    "Las actividades entregadas se guardan en el registro privado " +
+    "y se recuperan al verificar tu correo.";
+}
+
+const panelResultado =
+  document.getElementById(
+    "resultado"
+  ).closest(".panel");
+
+const avisoResultado =
+  panelResultado.querySelector(
+    ".estado"
+  );
+
+if (avisoResultado) {
+  avisoResultado.textContent =
+    "M00 no se califica. La nota definitiva procede del registro privado. " +
+    "El correo se solicita al completar las cinco actividades; " +
+    "su estado puede ser pendiente, enviado o error.";
+}
+
+
+/* RESTAURACIÓN DE LA SESIÓN DE ESTA PESTAÑA */
+
+usuarioCurso =
+  recuperarSesionCurso();
+
+pintarSesionCurso();
+actualizarProgresoServidorCurso();
+pintarResultadoFinalCurso();
+
+if (usuarioCurso) {
+  sincronizarEntregasCurso();
+  }
 mostrar(0);
 </script>
 </body>
