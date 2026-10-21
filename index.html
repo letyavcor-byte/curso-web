@@ -359,16 +359,9 @@ const bloque = (titulo, texto) => ({
   texto
 });
 
-const pregunta = (
+const pregunta = (texto, opciones) => ({
   texto,
-  opciones,
-  correcta,
-  explicacion
-) => ({
-  texto,
-  opciones,
-  correcta,
-  explicacion
+  opciones
 });
 
 const modulos = [
@@ -499,85 +492,69 @@ const modulos = [
       "No se evalúan fechas de reforma, jerarquías jurídicas controvertidas ni la afirmación de ausencia de actualizaciones.",
 
     preguntas: [
-      pregunta(
+            pregunta(
         "¿Qué diferencia debe conservarse al estudiar los organismos?",
         [
           "Todos tienen las mismas facultades",
           "Una asociación de aerolíneas no es una autoridad aeronáutica",
           "Todos expiden permisos nacionales"
-        ],
-        1,
-        "El material distingue organismos, asociaciones y autoridades; sus funciones no son intercambiables."
+        ]
       ),
-      pregunta(
+            pregunta(
         "¿Cómo presenta el material la relación entre PANS y SARPS?",
         [
           "Como categorías distintas",
           "Como documentos idénticos",
           "Como documentos de una empresa"
-        ],
-        0,
-        "Las notas señalan que los PANS no tienen la misma categoría que los SARPS."
+        ]
       ),
-      pregunta(
+            pregunta(
         "¿Qué incluye el grupo de establecimiento del sistema?",
         [
           "Sólo multas",
           "Sólo vuelos de demostración",
           "Personal técnico y orientación técnica"
-        ],
-        2,
-        "El material incluye personal técnico y orientación entre los elementos para establecer el sistema."
+        ]
       ),
-      pregunta(
+            pregunta(
         "¿Qué pertenece a la aplicación del sistema?",
         [
           "Vigilancia continua",
           "Diseño de logotipos",
           "Publicidad comercial"
-        ],
-        0,
-        "La vigilancia continua forma parte de los elementos de implantación descritos."
+        ]
       ),
-      pregunta(
+            pregunta(
         "¿Basta encontrar un procedimiento escrito para demostrar su cumplimiento?",
         [
           "Sí, sin otra revisión",
           "No; también debe revisarse su implementación",
           "Sí, si tiene una portada"
-        ],
-        1,
-        "La presentación distingue cumplimiento documental e implementación."
+        ]
       ),
-      pregunta(
+            pregunta(
         "¿Qué debe sustentar un hallazgo?",
         [
           "Una opinión",
           "Un rumor",
           "Fundamento aplicable y evidencia"
-        ],
-        2,
-        "El material exige fundamento legal y pruebas o evidencias."
+        ]
       ),
-      pregunta(
+            pregunta(
         "En el caso, ¿qué falta en la redacción inicial?",
         [
           "Trazabilidad de evidencia y requisito",
           "Un título más largo",
           "El precio del sistema"
-        ],
-        0,
-        "La frase general no identifica los registros ni el requisito que sustenta la discrepancia."
+        ]
       ),
-      pregunta(
+            pregunta(
         "En el caso, ¿cuál es el siguiente paso didácticamente adecuado?",
         [
           "Declarar una sanción sin más datos",
           "Identificar registros, condición observada y requisito aplicable",
           "Ignorar los documentos"
-        ],
-        1,
-        "Hay que construir una relación verificable entre evidencia, condición y fundamento."
+        ]
       )
     ]
   },
@@ -646,25 +623,21 @@ const modulos = [
       "No se incluyen instrucciones de aplicación de fluidos, tiempos de protección ni decisiones de despegue.",
 
     preguntas: [
-      pregunta(
+            pregunta(
         "¿Cuál es el objetivo central?",
         [
           "Revisar documentación para determinar continuidad del trámite",
           "Aplicar fluidos",
           "Diseñar motores"
-        ],
-        0,
-        "El módulo se enfoca en revisión documental para aprobación del manual."
+        ]
       ),
-      pregunta(
+            pregunta(
         "¿En qué contexto se presenta el programa?",
         [
           "Publicidad",
           "Aeronaves en tierra y operación en clima frío",
           "Diseño de aeropuertos"
-        ],
-        1,
-        "La presentación trata deshielo y antihielo en tierra para clima frío."
+        ]
       ),
       pregunta(
         "¿Qué contaminante aparece en el material?",
@@ -672,9 +645,7 @@ const modulos = [
           "Escarcha",
           "Ruido",
           "Vibración"
-        ],
-        0,
-        "La escarcha está entre los contaminantes mencionados."
+        ]
       ),
       pregunta(
         "¿Qué secuencia sigue el esquema del trámite?",
@@ -682,9 +653,7 @@ const modulos = [
           "Respuesta y luego recepción",
           "Certificación inmediata",
           "Recepción, análisis y respuesta"
-        ],
-        2,
-        "La presentación organiza esas tres etapas."
+        ]
       ),
       pregunta(
         "¿Cómo se utiliza MIO-FT037-01 en esta página?",
@@ -692,9 +661,7 @@ const modulos = [
           "Como lista inventada",
           "Como referencia del material, sin reproducir campos no disponibles",
           "Como autorización de vuelo"
-        ],
-        1,
-        "No se presentan campos oficiales que no se hayan revisado."
+        ]
       ),
       pregunta(
         "¿Qué debe hacerse con una referencia no aclarada?",
@@ -702,9 +669,7 @@ const modulos = [
           "Inventar el numeral",
           "Marcarla para validación",
           "Eliminar toda la documentación"
-        ],
-        1,
-        "Los puntos inciertos quedan pendientes de revisión y fuera de la evaluación."
+        ]
       ),
       pregunta(
         "En el caso, ¿tener índice demuestra cumplimiento completo?",
@@ -712,9 +677,7 @@ const modulos = [
           "No; hay que revisar contenido y anexos",
           "Sí, siempre",
           "Sí, si es extenso"
-        ],
-        0,
-        "La estructura no demuestra la suficiencia del contenido ni del expediente."
+        ]
       ),
       pregunta(
         "En el caso, ¿qué debe documentarse?",
@@ -722,9 +685,7 @@ const modulos = [
           "Sólo el color de portada",
           "La aprobación inmediata",
           "El anexo faltante y la referencia por aclarar"
-        ],
-        2,
-        "Las observaciones deben identificar información faltante y dudas concretas."
+        ]
       )
     ]
   },
@@ -803,9 +764,7 @@ const modulos = [
           "Sí",
           "No",
           "Sólo por el nombre del documento"
-        ],
-        1,
-        "El material diferencia expresamente las dos aprobaciones."
+        ]
       ),
       pregunta(
         "¿Qué comprueba una demostración respecto a los documentos?",
@@ -813,9 +772,7 @@ const modulos = [
           "Capacidad e implementación",
           "Sólo ortografía",
           "Sólo cantidad de páginas"
-        ],
-        0,
-        "La demostración permite verificar en la práctica lo propuesto."
+        ]
       ),
       pregunta(
         "¿Qué caracteriza al tema SET-IMC del material?",
@@ -823,9 +780,7 @@ const modulos = [
           "Aeronaves sin motor",
           "Sólo navegación marítima",
           "Monomotoras de turbina en operación nocturna o IMC"
-        ],
-        2,
-        "Es el alcance que describe la presentación."
+        ]
       ),
       pregunta(
         "¿Qué distinción aparece para dispositivos EFB?",
@@ -833,9 +788,7 @@ const modulos = [
           "Portátiles e instalados",
           "Grandes y bonitos",
           "Nuevos y caros"
-        ],
-        0,
-        "El material separa dispositivos portátiles e instalados."
+        ]
       ),
       pregunta(
         "¿Qué debe separarse al revisar un EFB?",
@@ -843,9 +796,7 @@ const modulos = [
           "Únicamente el color",
           "Equipo físico, aplicaciones y procedimientos",
           "Sólo la marca"
-        ],
-        1,
-        "Son aspectos diferentes del expediente."
+        ]
       ),
       pregunta(
         "¿Cómo se tratan los contenidos RVSM mezclados con SET-IMC?",
@@ -853,9 +804,7 @@ const modulos = [
           "Se asumen equivalentes",
           "Se convierten en examen",
           "Se mantienen pendientes de aclaración"
-        ],
-        2,
-        "No se mezclan procesos sin validar la correspondencia."
+        ]
       ),
       pregunta(
         "En el caso CAT II/III, ¿qué error comete el solicitante?",
@@ -863,9 +812,7 @@ const modulos = [
           "Confundir aeronavegabilidad con aprobación operacional",
           "Entregar un oficio",
           "Identificar su aeronave"
-        ],
-        0,
-        "El oficio técnico no elimina por sí mismo los requisitos operacionales."
+        ]
       ),
       pregunta(
         "En el caso EFB, ¿es suficiente la fotografía?",
@@ -873,9 +820,7 @@ const modulos = [
           "Sí, siempre",
           "No; no demuestra aplicaciones ni procedimientos",
           "Sí, si es nítida"
-        ],
-        1,
-        "La fotografía no acredita por sí sola los aspectos del uso operacional."
+        ]
       )
     ]
   },
@@ -954,9 +899,7 @@ const modulos = [
           "Renovación",
           "Solicitud formal",
           "Certificación automática"
-        ],
-        1,
-        "La segunda fase es la solicitud formal."
+        ]
       ),
       pregunta(
         "¿Qué sigue a la solicitud formal?",
@@ -964,9 +907,7 @@ const modulos = [
           "Evaluación documental",
           "Publicidad",
           "Renovación"
-        ],
-        0,
-        "La tercera fase evalúa el contenido documental."
+        ]
       ),
       pregunta(
         "¿Cuál es una función del LEC descrita en el material?",
@@ -974,9 +915,7 @@ const modulos = [
           "Sustituir todas las especialidades",
           "Elegir logotipos",
           "Coordinar y distribuir la revisión"
-        ],
-        2,
-        "El LEC coordina el equipo y distribuye información según especialidades."
+        ]
       ),
       pregunta(
         "¿Qué distingue la fase 4 de la fase 3?",
@@ -984,9 +923,7 @@ const modulos = [
           "El número de páginas",
           "Observación de capacidad e implementación",
           "Sólo cambio de nombre"
-        ],
-        1,
-        "La demostración e inspección añade comprobación práctica."
+        ]
       ),
       pregunta(
         "¿Qué acompaña al AOC para delimitar la operación?",
@@ -994,9 +931,7 @@ const modulos = [
           "Especificaciones de operación",
           "Un folleto comercial",
           "Una fotografía"
-        ],
-        0,
-        "Las especificaciones incluyen autorizaciones y limitaciones."
+        ]
       ),
       pregunta(
         "¿Termina toda la supervisión al emitir el AOC?",
@@ -1004,9 +939,7 @@ const modulos = [
           "Sí",
           "Sólo si cambia el nombre",
           "No; el material contempla vigilancia posterior"
-        ],
-        2,
-        "La presentación incluye vigilancia de continuidad del cumplimiento."
+        ]
       ),
       pregunta(
         "En el caso, ¿entregar todos los archivos demuestra suficiencia?",
@@ -1014,9 +947,7 @@ const modulos = [
           "Sí",
           "No; su contenido debe evaluarse",
           "Sólo si tienen portada"
-        ],
-        1,
-        "La entrega no garantiza que los procedimientos estén completos."
+        ]
       ),
       pregunta(
         "En el caso, ¿qué corresponde antes de continuar?",
@@ -1024,9 +955,7 @@ const modulos = [
           "Comunicar y atender las observaciones documentales",
           "Emitir sin revisar",
           "Ignorar los procedimientos incompletos"
-        ],
-        0,
-        "La presentación contempla observaciones y correcciones cuando hay deficiencias."
+        ]
       )
     ]
   },
@@ -1105,9 +1034,7 @@ const modulos = [
           "Con el alcance del mantenimiento",
           "Sólo con el tamaño del edificio",
           "Con la decoración"
-        ],
-        0,
-        "La revisión se relaciona con el trabajo y nivel de mantenimiento."
+        ]
       ),
       pregunta(
         "¿Qué evidencia se relaciona con el personal?",
@@ -1115,9 +1042,7 @@ const modulos = [
           "Una fotografía",
           "Licencias y constancias de capacitación",
           "Un folleto"
-        ],
-        1,
-        "El material contempla licencias y formación del personal."
+        ]
       ),
       pregunta(
         "¿Qué debe revisarse en los datos técnicos?",
@@ -1125,9 +1050,7 @@ const modulos = [
           "Sólo cantidad de libros",
           "Sólo color de carpetas",
           "Disponibilidad y acceso a información actualizada"
-        ],
-        2,
-        "La presentación considera acceso a manuales, boletines y actualizaciones."
+        ]
       ),
       pregunta(
         "¿Cuándo se revisa calibración en el esquema del material?",
@@ -1135,9 +1058,7 @@ const modulos = [
           "Cuando aplique al equipo o herramienta",
           "Nunca",
           "Para cualquier objeto sin distinción"
-        ],
-        0,
-        "La presentación indica calibración cuando aplique."
+        ]
       ),
       pregunta(
         "¿Qué aspecto corresponde al almacén?",
@@ -1145,9 +1066,7 @@ const modulos = [
           "Publicidad",
           "Identificación y preservación de componentes",
           "Venta de boletos"
-        ],
-        1,
-        "La identificación y preservación forman parte de la revisión descrita."
+        ]
       ),
       pregunta(
         "¿Qué complementa la revisión documental?",
@@ -1155,9 +1074,7 @@ const modulos = [
           "Cambiar la portada",
           "Comprar muebles",
           "Observar servicios y aplicación de procedimientos"
-        ],
-        2,
-        "El material contempla observación de servicios de mantenimiento."
+        ]
       ),
       pregunta(
         "En el caso, ¿qué falta respecto a los dos técnicos?",
@@ -1165,9 +1082,7 @@ const modulos = [
           "Evidencia de capacitación",
           "Una fotografía",
           "Una tarjeta comercial"
-        ],
-        0,
-        "El expediente no demuestra la capacitación de esas personas."
+        ]
       ),
       pregunta(
         "En el caso, ¿qué requiere revisión adicional?",
@@ -1175,9 +1090,7 @@ const modulos = [
           "Sólo el contrato",
           "Calibración e identificación de componentes",
           "Sólo el horario de oficina"
-        ],
-        1,
-        "Hay dos condiciones concretas que requieren evidencia y seguimiento."
+        ]
       )
     ]
   }
@@ -1640,128 +1553,7 @@ function mostrar(indice) {
     subir();
   });
 
-  if (modulo.preguntas.length) {
-    const formulario = document.getElementById("actividad");
-
-    formulario.addEventListener("submit", evento => {
-      evento.preventDefault();
-
-      const datos = new FormData(formulario);
-
-      const faltantes = modulo.preguntas
-        .map((preg, numero) => numero)
-        .filter(numero => !datos.has("q" + numero));
-
-      if (faltantes.length) {
-        document.getElementById("error").textContent =
-          "Faltan las preguntas: " +
-          faltantes.map(numero => numero + 1).join(", ") +
-          ".";
-
-        const campo = formulario.querySelector(
-          `[name="q${faltantes[0]}"]`
-        );
-
-        campo.focus();
-        return;
-      }
-
-      document.getElementById("error").textContent = "";
-
-      const respuestas = modulo.preguntas.map(
-        (preg, numero) => Number(datos.get("q" + numero))
-      );
-
-      const aciertos = respuestas.filter(
-        (respuesta, numero) =>
-          respuesta === modulo.preguntas[numero].correcta
-      ).length;
-
-      resultados[indice] = {
-        respuestas,
-        aciertos
-      };
-
-      retroalimentar(indice);
-      actualizar();
-
-      document.getElementById("resultado").textContent = "";
-    });
-
-    document.getElementById("repetir").addEventListener("click", () => {
-      resultados[indice] = null;
-
-      document.getElementById("resultado").textContent = "";
-
-      actualizar();
-      mostrar(indice);
-
-      document.getElementById("actividad").scrollIntoView({
-        behavior: "smooth"
-      });
-    });
-
-    if (resultados[indice]) {
-      resultados[indice].respuestas.forEach(
-        (respuesta, numero) => {
-          formulario.querySelector(
-            `[name="q${numero}"][value="${respuesta}"]`
-          ).checked = true;
-        }
-      );
-
-      retroalimentar(indice);
-    }
   }
-}
-
-function retroalimentar(indice) {
-  const modulo = modulos[indice];
-  const resultado = resultados[indice];
-
-  modulo.preguntas.forEach((preg, numero) => {
-    const correcta =
-      resultado.respuestas[numero] === preg.correcta;
-
-    const cuadro = document.getElementById("f" + numero);
-
-    cuadro.hidden = false;
-    cuadro.className =
-      "feedback " + (correcta ? "bien" : "mal");
-
-    cuadro.textContent =
-      (correcta ? "Correcto. " : "Respuesta por revisar. ") +
-      "Respuesta esperada: " +
-      preg.opciones[preg.correcta] +
-      ". " +
-      preg.explicacion;
-  });
-
-  document.querySelectorAll("#actividad input").forEach(campo => {
-    campo.disabled = true;
-  });
-
-  document.getElementById("entregar").disabled = true;
-  document.getElementById("repetir").hidden = false;
-
-  document.getElementById("nota").innerHTML = `
-    <h3>
-      Resultado:
-      ${resultado.aciertos} de ${modulo.preguntas.length}
-      (
-        ${
-          Math.round(
-            resultado.aciertos / modulo.preguntas.length * 100
-          )
-        }/100
-      )
-    </h3>
-
-    <p>
-      Revisa las explicaciones antes de repetir o continuar.
-    </p>
-  `;
-}
 
 function actualizar() {
   const leidas = lecturas.filter(Boolean).length;
