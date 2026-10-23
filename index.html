@@ -1452,9 +1452,8 @@ function mostrar(indice) {
           <h3>Actividad del módulo · 8 preguntas</h3>
 
           <p>
-            Contesta todas las preguntas y entrega la actividad para
-            consultar el resultado y las explicaciones.
-            Puedes repetirla.
+            Contesta todas las preguntas antes de entregar la actividad.
+            Puedes cambiar tus opciones antes de confirmar la entrega.
           </p>
 
           <form id="actividad" novalidate>
@@ -1478,11 +1477,6 @@ function mostrar(indice) {
                     `).join("")
                   }
 
-                  <div
-                    id="f${numero}"
-                    class="feedback"
-                    hidden
-                  ></div>
                 </fieldset>
               `).join("")
             }
@@ -1493,14 +1487,7 @@ function mostrar(indice) {
               <button type="submit" id="entregar">
                 Entregar actividad
               </button>
-
-              <button
-                type="button"
-                id="repetir"
-                hidden
-              >
-                Repetir actividad
-              </button>
+ 
             </div>
           </form>
 
